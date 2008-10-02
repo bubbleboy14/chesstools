@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='chesstools',
-    version='0.1.0',
+    version='0.1.1',
     author='Mario Balibrera',
     author_email='mario.balibrera@gmail.com',
     license='MIT License',
@@ -17,6 +17,9 @@ setup(
         [console_scripts]
         buildchessbook = chesstools.book:_build_command_line
     ''',
+    install_requires = [
+        'sqlalchemy >= 0.4'
+    ],
     zip_safe = False,
     classifiers = [
         'Development Status :: 3 - Alpha',
