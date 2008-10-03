@@ -56,3 +56,22 @@ class Timer(object):
             if len(times[x][1]) == 1:
                 times[x][1] = '0'+times[x][1]
         return ['%s:%s'%tuple(time) for time in times]
+
+class TimeLockTimer(Timer):
+    def __init__(self, initial, increment):
+        self.players = {}
+        self.set(initial, increment)
+        self.turn = -1
+        self.start_time = None
+        self.restore_time = None
+
+    def move_sent(self):
+        self.restore_time = time.time()
+
+    def move_received(self):
+        if self.restore_time:
+            diff = time.time() - self.restore_time
+            self.restore_time = None
+            self.players[self.turn] += diff
+        else:
+            print 'must call "TimeLockTimer.move_sent()" before "TimeLockTimer.move_received()"'
