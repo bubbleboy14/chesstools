@@ -190,9 +190,8 @@ class Board(object):
             elif a[0] + 2 == b[0]:
                 ep = (a[0]+1,a[1])
             elif self.en_passant == b:
-                diff = self.move == 'white' and 1 or -1
-                cap_pos = (b[0]+diff,b[1])
-                self.captured = self.get_square(cap_pos)
+                cap_pos = (a[0],b[1])
+                self.captured = self.get_square(cap_pos, pos)
                 self.set_square(cap_pos, None, pos)
         elif isinstance(target, King):
             if b[1] - a[1] == 2:
