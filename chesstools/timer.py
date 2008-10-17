@@ -4,10 +4,10 @@ class Timer(object):
     def __init__(self, initial, increment):
         self.players = {}
         self.set(initial, increment)
-        self.turn = -1 # white
-        self.start_time = None
 
     def set_clocks(self, p1, p2):
+        self.turn = -1
+        self.start_time = None
         self.players[-1] = float(p1)
         self.players[1] = float(p2)
 
