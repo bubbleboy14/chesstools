@@ -1,4 +1,4 @@
-import os, re
+import os, re, time
 from sqlalchemy import Table, Column, Integer, String, MetaData, create_engine
 from sqlalchemy.orm import mapper, sessionmaker
 from chesstools.board import Board
@@ -7,6 +7,7 @@ from chesstools.move import Move, to_array, to_algebraic, column_to_index, row_t
 TYPES = {'P':'Pawn', 'N':'Knight', 'B':'Bishop', 'R':'Rook', 'Q':'Queen', 'K':'King'}
 CASTLES = { 'white': {'O-O':'g1','O-O-O':'c1'},
             'black': {'O-O':'g8','O-O-O':'c8'} }
+starttime = None
 
 COMMENT = re.compile(r'\{.*\}')
 metadata = MetaData()
@@ -40,7 +41,7 @@ def get_session(db):
     engine = create_engine('sqlite:///%s'%db)
     metadata.bind = engine
     metadata.create_all()
-    return sessionmaker(bind=engine, autoflush=True, transactional=True)()
+    return sessionmaker(bind=engine)()
 
 class InvalidBookException(Exception):
     pass
@@ -59,7 +60,7 @@ class Book(object):
 
 def process_game(game, session, color):
     board = Board()
-    moves = [m for m in game.split(' ') if m and '.' not in m]
+    moves = [m.strip() for m in game.split(' ') if m and '.' not in m]
     for m in moves:
         position = board.fen_signature()
         if '=' in m:
@@ -81,26 +82,28 @@ def process_game(game, session, color):
         else:
             pieces = [p for p in board.pawns(board.turn, column_to_index(m[0])) if p.legal_move(to_array(end))]
         if len(pieces) != 1:
-            raise Exception, "bad move - %s possibilities for %s: %s"%(len(pieces), m, pieces)
+            output('\n******\nerror parsing game\nmove: "%s"\nfen: "%s"\n******'%(m,board.fen()))
+            raise Exception, "bad move - %s possibilities for %s"%(len(pieces), m)
         start = to_algebraic(pieces[0].pos)
         move = Move(start, end, promotion)
-        if not color or board.turn == color:
+        if color in ['both', board.turn]:
             bookmove = session.query(BookMove).filter_by(position=position, start=move.start, end=move.end, promotion=move.promotion).first()
             if bookmove:
                 bookmove.strength += 1
             else:
                 session.save(BookMove(position, move.start, move.end, move.promotion))
-            session.commit()
         board.move(move)
 
-def process_file(fname, session, color):
+def process_file(fname, session, color, player):
+    output('file %s started'%fname, 1)
+    gnum = 0
     f = open(fname)
-    txt = f.read().replace('\n',' ')
+    txt = f.read().replace('\r','').replace('\n',' ')
     f.close()
     while txt:
         start = txt.find(' 1.')
         if start == -1: break
-        txt = txt[start:]
+        headers, txt = txt[:start], txt[start:]
         end = txt.find(' 1-0')
         for ending in [' 0-1',' 1/2-1/2',' *']:
             e = txt.find(ending)
@@ -108,6 +111,18 @@ def process_file(fname, session, color):
                 end = e
         if end == -1: break
         gtxt, txt = txt[:end], txt[end:]
+        if player:
+            color = None
+            playerheaders = [(h[:5], h[7:h.index('"', 7)]) for h in headers.lower().split('[') if h[:6] in ['white ','black ']]
+            for colortag, nametag in playerheaders:
+                if player in nametag:
+                    if color:
+                        color = "both"
+                    else:
+                        color = colortag
+            if not color:
+                output('skipping game between %s and %s'%(playerheaders[0][1],playerheaders[1][1]), 3)
+                continue
         comment = COMMENT.search(gtxt)
         while comment:
             gtxt = gtxt[:comment.start()]+gtxt[comment.end():]
@@ -127,25 +142,44 @@ def process_file(fname, session, color):
             gtxt = gtxt[:par_open]+gtxt[par_close+1:]
             par_open = gtxt.find('(')
         process_game(gtxt.replace('x','').replace('+','').replace('#','').replace('.','. '), session, color)
-    print 'file %s completed'%fname
-    if txt:
-        print 'leftover text: %s'%txt
+        gnum += 1
+        if not gnum % 10:
+            commit(session, gnum)
+    if gnum % 10:
+        commit(session, gnum)
+    output('file %s completed'%fname, 1)
 
-def build(pgn, db, color=None):
-    if color not in ['white','black']:
-        color = None
+def commit(session, gnum):
+    session.commit()
+    output('processed %s games'%(gnum), 2)
+
+def output(data,depth=0):
+    print '  '*depth,str(time.time()-starttime)[:6],':',data
+
+def build(pgn, db, color=None, player=None):
+    global starttime
+    starttime = time.time()
+    if color != 'player':
+        player = None
     db += '.book'
     if os.path.isfile(db) and raw_input('opening book db location exists! add to existing db?\n') != 'yes':
-        print 'goodbye'
+        output('goodbye')
     else:
+        output('building database...')
         session = get_session(db)
         if os.path.isfile(pgn):
-            process_file(pgn, session, color)
+            process_file(pgn, session, color, player)
         elif os.path.isdir(pgn):
             for f in [x for x in os.walk(pgn).next()[2] if x.endswith('.pgn')]:
-                process_file(os.path.join(pgn, f), session, color)
+                process_file(os.path.join(pgn, f), session, color, player)
         else:
-            print 'source file or directory does not exist!'
+            output('source file or directory does not exist!')
 
 def _build_command_line():
-    build(raw_input('where is the file or directory of pgn-formatted games?\n'), raw_input('what will you call this opening book database?\n'), raw_input('which color should i use? ("white", "black", or "both")\n'))
+    pgn, db = raw_input('where is the file or directory of pgn-formatted games?\n'), raw_input('\nwhat will you call this opening book database?\n')
+    color, player = None, None
+    while color not in ['white','black','both','player']:
+        color = raw_input('\nwhich color should i use?\n  "white", "black", "both", or "player" (to select player by name)\n')
+    if color == 'player':
+        player = raw_input('\nok, which player?\n')
+    build(pgn, db, color, player)
