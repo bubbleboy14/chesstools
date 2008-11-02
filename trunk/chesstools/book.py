@@ -1,4 +1,5 @@
 import os, re, time
+from sqlalchemy import __version__ as sa_version
 from sqlalchemy import Table, Column, Integer, String, MetaData, create_engine
 from sqlalchemy.orm import mapper, sessionmaker
 from chesstools.board import Board
@@ -157,6 +158,8 @@ def output(data,depth=0):
     print '  '*depth,str(time.time()-starttime)[:6],':',data
 
 def build(pgn, db, color=None, player=None):
+    if float(sa_version[:3]) < 0.5 and raw_input("The chesstools book builder runs EXTREMELY SLOW on SQLAlchemy < 0.5, and you should probably STOP RIGHT NOW and upgrade SQLAlchemy. Are you sure you want to continue?\n") != 'yes':
+        return
     global starttime
     starttime = time.time()
     if color != 'player':
