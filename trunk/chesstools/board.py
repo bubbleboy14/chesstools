@@ -103,7 +103,7 @@ class Board(object):
         if self.kings['white'].castle['queen']: castles += 'Q'
         if self.kings['black'].castle['king']: castles += 'k'
         if self.kings['black'].castle['queen']: castles += 'q'
-        return castles
+        return castles or "-"
 
     def fen_signature(self):
         return ' '.join([self._fen_layout(), self.turn[0], self._fen_castles(), to_algebraic(self.en_passant)])
