@@ -14,6 +14,9 @@ class Piece(object):
         self.name = self.__class__.__name__
         self.init()
 
+    def __str__(self):
+        return PIECE_TO_LETTER[self.__class__][self.color]
+
     def __repr__(self):
         return '<%s %s@%s>'%(self.color, self.name, to_algebraic(self.pos))
 
@@ -101,9 +104,6 @@ class Pawn(Piece):
         self.home_row = self.color == 'white' and 1 or 6
         self.promotion_row = self.color == 'white' and 7 or 0
 
-    def __str__(self):
-        return self.color == 'white' and 'P' or 'p'
-
     def _pawn_scan(self, color, cols):
         c = self.column()
         s = 0
@@ -166,9 +166,6 @@ class Pawn(Piece):
         return False
 
 class Knight(Piece):
-    def __str__(self):
-        return self.color == 'white' and 'N' or 'n'
-
     def _all_moves(self):
         m = []
         r, c = self.row(), self.column()
@@ -190,40 +187,36 @@ class Knight(Piece):
         return True
 
 class Bishop(Piece):
-    def __str__(self):
-        return self.color == 'white' and 'B' or 'b'
-
     def can_capture(self, dest, layout=None):
         return abs(self.row() - dest[0]) == abs(self.column() - dest[1])
 
 class Rook(Piece):
     def init(self):
-        self.side = self.column() and 'king' or 'queen'
-
-    def __str__(self):
-        return self.color == 'white' and 'R' or 'r'
+        self.side = None
 
     def can_capture(self, dest, layout=None):
         return dest[0] == self.row() or dest[1] == self.column()
 
     def move(self, pos):
         self.pos = pos
-        self.board.kings[self.color].castle[self.side] = None
+        if self.side:
+            self.board.kings[self.color].castle[self.side] = None
 
 class Queen(Piece):
-    def __str__(self):
-        return self.color == 'white' and 'Q' or 'q'
-
     def can_capture(self, dest, layout=None):
         return dest[0] == self.row() or dest[1] == self.column() or abs(self.row() - dest[0]) == abs(self.column() - dest[1])
 
 class King(Piece):
     def init(self):
-        self.castle = {'king':6,'queen':2}
+        self.castle = {'king': None,'queen': None}
         self.home_row = self.color == 'black' and 7 or 0
 
-    def __str__(self):
-        return self.color == 'white' and 'K' or 'k'
+    def set_castle(self, qr, kr):
+        qr.castle_king_column = 2
+        kr.castle_king_column = 6
+        qr.side = 'queen'
+        kr.side = 'king'
+        self.castle = {'queen': qr, 'king': kr}
 
     def copy(self):
         k = King(None, self.color, self.pos)
@@ -232,22 +225,38 @@ class King(Piece):
 
     def _all_moves(self):
         m = []
-        r, c = self.row(), self.column()
+        row, col = self.row(), self.column()
         for x in range(-1,2):
             for y in range(-1,2):
                 if x or y:
-                    a, b = r+x, c+y
+                    a, b = row+x, col+y
                     if a < 0 or b < 0 or a > 7 or b > 7:
                         continue
                     if self._good_target([a,b]):
                         m.append([a,b])
         if self.board.safe_square(self.pos):
-            for direction in self.castle:
-                c = self.castle[direction]
-                if c:
-                    target_square = [self.row(), c]
-                    mid_square = [self.row(), (self.column() + c) /2]
-                    if self.board.is_empty(target_square) and self.board.is_empty(mid_square) and self.board.safe_square(mid_square):
+            for rook in self.castle.values():
+                if rook:
+                    target_square = [row, rook.castle_king_column]
+                    # target is empty
+                    safemove = self.board.is_empty(target_square)
+                    # king and rook are unimpeded
+                    if safemove:
+                        low = min(col, rook.castle_king_column, rook.column()) + 1
+                        high = max(col, rook.castle_king_column, rook.column())
+                        for mid_square in [[row, i] for i in range(low, high)]:
+                            if not self.board.is_empty(mid_square):
+                                safemove = False
+                                break
+                    # king's path is safe
+                    if safemove:
+                        low = min(col, rook.castle_king_column) + 1
+                        high = max(col, rook.castle_king_column)
+                        for mid_square in [[row, i] for i in range(low, high)]:
+                            if not self.board.safe_square(mid_square):
+                                safemove = False
+                                break
+                    if safemove:
                         m.append(target_square)
         return m
 
@@ -270,3 +279,24 @@ class King(Piece):
         self.pos = pos
         self.castle['king'] = None
         self.castle['queen'] = None
+
+# this is mostly here so we can get at these
+# strings without having initialized a piece.
+PIECE_TO_LETTER = {
+    King:   {"white": "K", "black": "k"},
+    Queen:  {"white": "Q", "black": "q"},
+    Rook:   {"white": "R", "black": "r"},
+    Bishop: {"white": "B", "black": "b"},
+    Knight: {"white": "N", "black": "n"},
+    Pawn:   {"white": "P", "black": "p"}
+}
+
+# to help us go the other way
+LETTER_TO_PIECE = {
+    "K": King,
+    "Q": Queen,
+    "R": Rook,
+    "B": Bishop,
+    "N": Knight,
+    "P": Pawn
+}
