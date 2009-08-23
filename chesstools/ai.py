@@ -1,7 +1,7 @@
 import random
 from thread import start_new_thread
 
-INFINITY = 1000
+INFINITY = float('inf')
 
 class Variation(object):
     def __init__(self, board, move, score=-INFINITY, current=False):

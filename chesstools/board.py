@@ -1,3 +1,4 @@
+import random
 from chesstools import COLORS
 from chesstools.piece import Pawn, Knight, Bishop, Rook, Queen, King
 from chesstools.move import to_algebraic
@@ -6,12 +7,14 @@ LINEUP = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PROMOS = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen}
 
 class Board(object):
-    def __init__(self, old_board=None):
+    def __init__(self, old_board=None, variant="standard", lineup=None):
         if old_board:
             for key, val in old_board.items():
                 setattr(self, key, val)
             for piece in self.pieces():
                 piece.board = self
+        elif variant == "960":
+            self.reset_960(lineup)
         else:
             self.reset()
 
@@ -49,6 +52,8 @@ class Board(object):
         return Board(
             {   'turn':self.turn,
                 'kings':self.kings.copy(),
+                'kr':self.kr,
+                'qr':self.qr,
                 'en_passant':self.en_passant,
                 'fullmove':self.fullmove,
                 'halfmove':self.halfmove,
@@ -57,20 +62,33 @@ class Board(object):
                 'position':[[p and p.copy() or None for p in row] for row in self.position]
             })
 
-    def reset(self):
+    def remake_lineup(self):
+        self.LINEUP = []
+        for piece in LINEUP:
+            self.LINEUP.append(piece)
+
+    def reset(self, hard=True):
+        if hard:
+            self.remake_lineup()
         self.turn = 'white'
         self.position = [
-            [ LINEUP[i](self, 'white', (0,i)) for i in range(8) ],
+            [ self.LINEUP[i](self, 'white', (0,i)) for i in range(8) ],
             [ Pawn(self, 'white', (1,i)) for i in range(8) ],
             [ None for i in range(8) ],
             [ None for i in range(8) ],
             [ None for i in range(8) ],
             [ None for i in range(8) ],
             [ Pawn(self, 'black', (6,i)) for i in range(8) ],
-            [ LINEUP[i](self, 'black', (7,i)) for i in range(8) ]
+            [ self.LINEUP[i](self, 'black', (7,i)) for i in range(8) ]
         ]
-        self.kings = { 'white': self.position[0][4],
-                       'black': self.position[7][4] }
+        k = self.LINEUP.index(King)
+        self.qr = self.LINEUP.index(Rook)
+        self.kr = self.LINEUP.index(Rook, self.qr+1)
+        self.kings = {}
+        for color, i in (('white', 0), ('black', 7)):
+            king = self.position[i][k]
+            king.set_castle(self.position[i][self.qr], self.position[i][self.kr])
+            self.kings[color] = king
         self.en_passant = None
         self.fullmove = 1
         self.halfmove = 0
@@ -78,6 +96,28 @@ class Board(object):
         self.all_positions = {self.this_position:1}
         self.changes = []
         self.captured = None
+
+    def reset_960(self, lineup=None):
+        if lineup:
+            self.LINEUP = lineup
+        else:
+            self.remake_lineup()
+            random.shuffle(self.LINEUP)
+        k = self.LINEUP.index(King)
+        r1 = self.LINEUP.index(Rook)
+        r2 = self.LINEUP.index(Rook, r1+1)
+        b1 = self.LINEUP.index(Bishop)
+        b2 = self.LINEUP.index(Bishop, b1+1)
+        if b1 % 2 == b2 % 2:
+            self.LINEUP[b2] = self.LINEUP[b2-1]
+            self.LINEUP[b2-1] = Bishop
+        if k < r1:
+            self.LINEUP[k] = Rook
+            self.LINEUP[r1] = King
+        elif k > r2:
+            self.LINEUP[k] = Rook
+            self.LINEUP[r2] = King
+        self.reset(hard=False)
 
     def _fen_layout(self):
         pieces = []
@@ -194,10 +234,10 @@ class Board(object):
                 self.captured = self.get_square(cap_pos, pos)
                 self.set_square(cap_pos, None, pos)
         elif isinstance(target, King):
-            if b[1] - a[1] == 2:
-                self.move_piece((a[0], 7), (a[0], 5), pos)
-            elif a[1] - b[1] == 2:
-                self.move_piece((a[0], 0), (a[0], 3), pos)
+            if b[1] == 6:
+                self.move_piece((a[0], self.kr), (a[0], 5), pos)
+            elif b[1] == 2:
+                self.move_piece((a[0], self.qr), (a[0], 3), pos)
         if not test:
             self.en_passant = ep
             if promotion:
