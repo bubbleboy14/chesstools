@@ -264,11 +264,11 @@ class King(Piece):
         return abs(self.row() - dest[0]) < 2 and abs(self.column() - dest[1]) < 2
 
     def _can_move_to(self, dest):
-        if self.can_capture: # normal move
+        if self.can_capture(dest): # normal move
             return True
         if self.board.safe_square(self.pos) and dest[0] == self.home_row: # castle
             for c in self.castle.values():
-                if dest[1] == c:
+                if c and dest[1] == c.castle_king_column:
                     return True
         return False
 
