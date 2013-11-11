@@ -92,7 +92,8 @@ def process_game(game, session, color):
             if bookmove:
                 bookmove.strength += 1
             else:
-                session.save(BookMove(position, move.start, move.end, move.promotion))
+                session.add(BookMove(position, move.start, move.end, move.promotion))
+                session.commit()
         board.move(move)
 
 def process_file(fname, session, color, player):

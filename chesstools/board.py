@@ -222,7 +222,6 @@ class Board(object):
         else:
             pos = self.position
         target = self.get_square(a)
-        self.move_piece(a, b, pos)
         ep = None
         if isinstance(target, Pawn):
             if a[0] - 2 == b[0]:
@@ -234,10 +233,11 @@ class Board(object):
                 self.captured = self.get_square(cap_pos, pos)
                 self.set_square(cap_pos, None, pos)
         elif isinstance(target, King):
-            if b[1] == 6:
+            if b[1] == 6 and target.castle['king']:
                 self.move_piece((a[0], self.kr), (a[0], 5), pos)
-            elif b[1] == 2:
+            elif b[1] == 2 and target.castle['queen']:
                 self.move_piece((a[0], self.qr), (a[0], 3), pos)
+        self.move_piece(a, b, pos)
         if not test:
             self.en_passant = ep
             if promotion:
