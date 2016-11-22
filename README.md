@@ -4,4 +4,4 @@ The compact minimax AI framework utilizes alpha-beta pruning and transposition t
 
 AI developers are encouraged to install [psyco](http://psyco.sourceforge.net/), which will significantly speed up bot performance.
 
-For sample code, see [MICS](https://github.com/bubbleboy14/micserver) and [MICC](https://github.com/bubbleboy14/micclient). Tutorials here.
+For sample code, see [MICS](https://github.com/bubbleboy14/micserver) and [MICC](https://github.com/bubbleboy14/micclient). Tutorials [here](http://mariobalibrera.com/mics).
