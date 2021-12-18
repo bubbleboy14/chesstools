@@ -1,5 +1,5 @@
 import random
-from thread import start_new_thread
+from _thread import start_new_thread
 
 INFINITY = float('inf')
 
@@ -88,4 +88,4 @@ class AI(object):
         self._score(variation, alpha, depth)
 
     def evaluate(self, board):
-        raise Exception, "evaluate is unimplemented in the base AI class, and must be overridden by a function that returns a number."
+        raise Exception("evaluate is unimplemented in the base AI class, and must be overridden by a function that returns a number.")
