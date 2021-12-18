@@ -16,7 +16,7 @@ def move_from_array(start, end):
 
 def column_to_index(i):
     if i not in COLS:
-        raise Exception, "%s not a valid column"%i
+        raise Exception("%s not a valid column"%i)
     return COLS.index(i)
 
 def row_to_index(i):

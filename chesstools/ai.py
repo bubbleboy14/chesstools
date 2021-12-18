@@ -1,5 +1,5 @@
 import random
-from thread import start_new_thread
+from _thread import start_new_thread
 
 INFINITY = float('inf')
 
@@ -19,6 +19,12 @@ class Variation(object):
 
     def __cmp__(self, other):
         return cmp(self.score, other.score)
+
+    def __lt__(self, other):
+        return self.score < other.score
+
+    def __gt__(self, other):
+        return self.score > other.score
 
     def __repr__(self):
         return "<Variation %s %s>"%(self.move, self.score)
@@ -88,4 +94,4 @@ class AI(object):
         self._score(variation, alpha, depth)
 
     def evaluate(self, board):
-        raise Exception, "evaluate is unimplemented in the base AI class, and must be overridden by a function that returns a number."
+        raise Exception("evaluate is unimplemented in the base AI class, and must be overridden by a function that returns a number.")

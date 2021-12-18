@@ -50,7 +50,7 @@ class InvalidBookException(Exception):
 class Book(object):
     def __init__(self, db):
         db += '.book'
-        if not os.path.isfile(db): raise InvalidBookException, 'could not find opening book at %s'%db
+        if not os.path.isfile(db): raise InvalidBookException('could not find opening book at %s'%db)
         self.session = get_session(db)
 
     def check(self, position):
@@ -84,7 +84,7 @@ def process_game(game, session, color):
             pieces = [p for p in board.pawns(board.turn, column_to_index(m[0])) if p.legal_move(to_array(end))]
         if len(pieces) != 1:
             output('\n******\nerror parsing game\nmove: "%s"\nfen: "%s"\n******'%(m,board.fen()))
-            raise Exception, "bad move - %s possibilities for %s"%(len(pieces), m)
+            raise Exception("bad move - %s possibilities for %s"%(len(pieces), m))
         start = to_algebraic(pieces[0].pos)
         move = Move(start, end, promotion)
         if color in ['both', board.turn]:
@@ -156,17 +156,17 @@ def commit(session, gnum):
     output('processed %s games'%(gnum), 2)
 
 def output(data,depth=0):
-    print '  '*depth,str(time.time()-starttime)[:6],':',data
+    print('  '*depth,str(time.time()-starttime)[:6],':',data)
 
 def build(pgn, db, color=None, player=None):
-    if float(sa_version[:3]) < 0.5 and raw_input("The chesstools book builder runs EXTREMELY SLOW on SQLAlchemy < 0.5, and you should probably STOP RIGHT NOW and upgrade SQLAlchemy. Are you sure you want to continue?\n") != 'yes':
+    if float(sa_version[:3]) < 0.5 and input("The chesstools book builder runs EXTREMELY SLOW on SQLAlchemy < 0.5, and you should probably STOP RIGHT NOW and upgrade SQLAlchemy. Are you sure you want to continue?\n") != 'yes':
         return
     global starttime
     starttime = time.time()
     if color != 'player':
         player = None
     db += '.book'
-    if os.path.isfile(db) and raw_input('opening book db location exists! add to existing db?\n') != 'yes':
+    if os.path.isfile(db) and input('opening book db location exists! add to existing db?\n') != 'yes':
         output('goodbye')
     else:
         output('building database...')
@@ -180,10 +180,10 @@ def build(pgn, db, color=None, player=None):
             output('source file or directory does not exist!')
 
 def _build_command_line():
-    pgn, db = raw_input('where is the file or directory of pgn-formatted games?\n'), raw_input('\nwhat will you call this opening book database?\n')
+    pgn, db = input('where is the file or directory of pgn-formatted games?\n'), input('\nwhat will you call this opening book database?\n')
     color, player = None, None
     while color not in ['white','black','both','player']:
-        color = raw_input('\nwhich color should i use?\n  "white", "black", "both", or "player" (to select player by name)\n')
+        color = input('\nwhich color should i use?\n  "white", "black", "both", or "player" (to select player by name)\n')
     if color == 'player':
-        player = raw_input('\nok, which player?\n')
+        player = input('\nok, which player?\n')
     build(pgn, db, color, player)

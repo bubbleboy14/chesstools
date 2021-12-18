@@ -74,4 +74,4 @@ class TimeLockTimer(Timer):
             self.restore_time = None
             self.players[self.turn] += diff
         else:
-            print 'must call "TimeLockTimer.move_sent()" before "TimeLockTimer.move_received()"'
+            print('must call "TimeLockTimer.move_sent()" before "TimeLockTimer.move_received()"')

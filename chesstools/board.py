@@ -2,6 +2,7 @@ import random
 from chesstools import COLORS
 from chesstools.piece import Pawn, Knight, Bishop, Rook, Queen, King
 from chesstools.move import to_algebraic
+from functools import reduce
 
 LINEUP = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PROMOS = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen}
@@ -9,7 +10,7 @@ PROMOS = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen}
 class Board(object):
     def __init__(self, old_board=None, variant="standard", lineup=None):
         if old_board:
-            for key, val in old_board.items():
+            for key, val in list(old_board.items()):
                 setattr(self, key, val)
             for piece in self.pieces():
                 piece.board = self
@@ -184,13 +185,15 @@ class Board(object):
         self.set_square(b, target, position)
         self.set_square(a, None, position)
 
-    def set_square(self, (r,c), piece, position=None):
+    def set_square(self, xxx_todo_changeme, piece, position=None):
+        (r,c) = xxx_todo_changeme
         position = position or self.position
         position[r][c] = piece
         if position == self.position:
             self.changes.append(((r,c), piece))
 
-    def get_square(self, (r,c), position=None):
+    def get_square(self, xxx_todo_changeme1, position=None):
+        (r,c) = xxx_todo_changeme1
         position = position or self.position
         return position[r][c]
 

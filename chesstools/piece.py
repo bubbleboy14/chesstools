@@ -1,5 +1,6 @@
 from chesstools import COLORS
 from chesstools.move import Move, to_algebraic, move_from_array
+from functools import reduce
 
 MOVES = { "Knight": [[-2,-1],[-1,-2],[2,-1],[1,-2],[-2,1],[-1,2],[2,1],[1,2]],
           "Bishop": [[-1,-1],[-1,1],[1,-1],[1,1]],
@@ -235,7 +236,7 @@ class King(Piece):
                     if self._good_target([a,b]):
                         m.append([a,b])
         if self.board.safe_square(self.pos):
-            for rook in self.castle.values():
+            for rook in list(self.castle.values()):
                 if rook:
                     target_square = [row, rook.castle_king_column]
                     # target is empty
@@ -267,7 +268,7 @@ class King(Piece):
         if self.can_capture(dest): # normal move
             return True
         if self.board.safe_square(self.pos) and dest[0] == self.home_row: # castle
-            for c in self.castle.values():
+            for c in list(self.castle.values()):
                 if c and dest[1] == c.castle_king_column:
                     return True
         return False
