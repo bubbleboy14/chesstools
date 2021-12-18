@@ -20,6 +20,12 @@ class Variation(object):
     def __cmp__(self, other):
         return cmp(self.score, other.score)
 
+    def __lt__(self, other):
+        return self.score < other.score
+
+    def __gt__(self, other):
+        return self.score > other.score
+
     def __repr__(self):
         return "<Variation %s %s>"%(self.move, self.score)
 
