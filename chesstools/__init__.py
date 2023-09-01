@@ -1,3 +1,5 @@
+__version__ = "0.1.8"
+
 try:
     import pyjion
     if input("you have pyjion. it's probs not faster. use it anyway? [N/y] ").lower() == "y":
