@@ -1,7 +1,7 @@
 import os, re, time
 from sqlalchemy import __version__ as sa_version
 from sqlalchemy import Table, Column, Integer, String, MetaData, create_engine
-from sqlalchemy.orm import mapper, sessionmaker
+from sqlalchemy.orm import registry, sessionmaker
 from chesstools.board import Board
 from chesstools.move import Move, to_array, to_algebraic, column_to_index, row_to_index
 
@@ -36,7 +36,7 @@ class BookMove(object):
     def __cmp__(self, other):
         return cmp(self.strength, other.strength)
 
-mapper(BookMove, bookmoves_table)
+registry().map_imperatively(BookMove, bookmoves_table)
 
 def get_session(db):
     engine = create_engine('sqlite:///%s'%db)
