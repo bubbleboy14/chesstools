@@ -244,7 +244,7 @@ class Board(object):
         if not test:
             self.en_passant = ep
             if promotion:
-                self.set_square(b, PROMOS[promotion](self, self.turn, b))
+                self.set_square(b, PROMOS[promotion.upper()](self, self.turn, b))
         return pos
 
     def not_in_check(self):
