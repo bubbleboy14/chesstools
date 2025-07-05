@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='chesstools',
-    version='0.1.9',
+    version='0.2.0',
     author='Mario Balibrera',
     author_email='mario.balibrera@gmail.com',
     license='MIT License',
