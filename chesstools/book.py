@@ -33,6 +33,9 @@ class BookMove(object):
     def __repr__(self):
         return '<BookMove %s-%s=%s strength:%s>'%(self.start, self.end, self.promotion, self.strength)
 
+    def __lt__(self, other):
+        return self.strength < other.strength
+
     def __cmp__(self, other):
         return cmp(self.strength, other.strength)
 
@@ -40,8 +43,7 @@ registry().map_imperatively(BookMove, bookmoves_table)
 
 def get_session(db):
     engine = create_engine('sqlite:///%s'%db)
-    metadata.bind = engine
-    metadata.create_all()
+    metadata.create_all(engine)
     return sessionmaker(bind=engine)()
 
 class InvalidBookException(Exception):
