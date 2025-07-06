@@ -2,6 +2,7 @@ import random
 from _thread import start_new_thread
 
 INFINITY = float('inf')
+PROFILER = None # cProfile or pyinstrument
 
 class Variation(object):
     def __init__(self, board, move, score=-INFINITY, current=False):
@@ -57,11 +58,23 @@ class AI(object):
                 self._report('%s:%s'%(branch.move, branch.score))
             branches.sort()
             self._move([branch.move_info() for branch in branches])
+        def _dothink():
+            if PROFILER == "cProfile":
+                import cProfile
+                cProfile.runctx("_think()", None,
+                    locals(), "pro/move%s.pro"%(board.fullmove,))
+            elif PROFILER == "pyinstrument":
+                from pyinstrument import Profiler
+                with Profiler(interval=0.1) as profiler:
+                    _think()
+                profiler.print()
+            else:
+                _think()
         if self._book:
             moves = self._book.check(board.fen_signature())
             if moves:
                 return self._move(moves)
-        start_new_thread(_think, ())
+        start_new_thread(_dothink, ())
 
     def _move(self, moves):
         self._move_cb(*random.choice(moves[:self._random]))
