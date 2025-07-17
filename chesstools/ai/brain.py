@@ -19,12 +19,15 @@ class AI(Loggy):
     def __call__(self, board):
         def _think():
             branches = self._branches(board)
+            blen = len(branches)
             if not branches:
                 return self._report('i lose!', True)
-            self._report('analyzing %s moves'%(len(branches)), True)
+            self._report('analyzing %s moves'%(blen,), True)
+            i = 0
             for branch in branches:
+                i += 1
                 self._step(branch, self._depth, -INFINITY, INFINITY)
-                self._report('%s:%s'%(branch.move, branch.score))
+                self._report('%s:%s (%s/%s)'%(branch.move, branch.score, i, blen))
                 self._table.flush()
             branches.sort()
             self._move([branch.move_info() for branch in branches])
