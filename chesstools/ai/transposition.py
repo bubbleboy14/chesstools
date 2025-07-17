@@ -8,24 +8,22 @@ class Transposition(db.ModelBase):
 
 class Table(Loggy):
     def __init__(self):
-        self._table = {}
+        self._all = {}
+        self._deepest = {}
 
     def add(self, trans):
         sig = trans.sig
-        if sig in self._table:
-            rec = self._table[sig]
-            rec["all"].append(trans)
-            if rec["deepest"].depth < trans.depth:
-                rec["deepest"] = trans
+        if sig in self._deepest:
+            self._all[sig].append(trans)
+            if self._deepest[sig].depth < trans.depth:
+                self._deepest[sig] = trans
         else:
-            self._table[sig] = {
-                "deepest": trans,
-                "all": [trans]
-            }
+            self._deepest[sig] = trans
+            self._all[sig] = [trans]
 
     def get(self, sig, depth):
-        if sig in self._table:
-            deepest = self._table[sig]["deepest"]
+        if sig in self._deepest:
+            deepest = self._deepest[sig]
             if deepest.depth >= depth:
                 return deepest
         trans = Transposition.query(Transposition.sig == sig).order(-Transposition.depth).get()
@@ -40,7 +38,7 @@ class Table(Loggy):
         self.add(trans)
 
     def flush(self):
-        transes = sum([v["all"] for v in self._table.values()], [])
-        self.log("flushing", len(transes), "scores")
+        transes = sum(self._all.values(), [])
+        self.log("flushing:", len(transes), "cache:", len(self._deepest.keys()))
         db.put_multi(transes)
-        self._table = {}
+        self._all = {}
