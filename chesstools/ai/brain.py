@@ -27,7 +27,7 @@ class AI(Loggy):
             for branch in branches:
                 i += 1
                 self._step(branch, self._depth, -INFINITY, INFINITY)
-                self._report('%s:%s (%s/%s)'%(branch.move, branch.score, i, blen))
+                self._report('%s:%s (%s/%s)'%(branch.move, branch.score, i, blen), True)
                 self._table.flush()
             branches.sort()
             self._move([branch.move_info() for branch in branches])

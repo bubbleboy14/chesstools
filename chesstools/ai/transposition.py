@@ -40,6 +40,6 @@ class Table(Loggy):
 
     def flush(self):
         transes = sum(self._all.values(), [])
-        self.log("flushing:", len(transes), "cache:", len(self._deepest.keys()))
         db.put_multi(transes)
         self._all = {}
+        self.log("flushed:", len(transes), "cache:", len(self._deepest.keys()))
