@@ -22,7 +22,7 @@ class AI(Loggy):
             blen = len(branches)
             if not branches:
                 return self._report('i lose!', True)
-            self._report('analyzing %s moves'%(blen,), True)
+            self._report('scoring %s moves'%(blen,), True)
             i = 0
             for branch in branches:
                 i += 1
