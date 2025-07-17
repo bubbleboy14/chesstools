@@ -1,5 +1,9 @@
+from fyg import config as confyg
 from fyg.util import Loggy
 import databae as db
+
+confyg.log.allow.append("db")
+db.config.pool.update("null", False)
 
 class Transposition(db.ModelBase):
     sig = db.String()
