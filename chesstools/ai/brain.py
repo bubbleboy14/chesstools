@@ -67,9 +67,9 @@ class AI(Loggy):
 
     def _step(self, variation, depth, alpha, beta):
         sig = variation.signature()
-        trans = self._table.get(sig, depth)
-        if trans:
-            variation.score = trans.score
+        dtup = self._table.get(sig, depth)
+        if dtup:
+            variation.score = dtup[1]
             return
         if not depth:
             return self._score(variation, self.evaluate(variation.board), 0)
