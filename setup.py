@@ -18,7 +18,7 @@ setup(
         buildchessbook = chesstools.book:_build_command_line
     ''',
     install_requires = [
-        'databae >= 0.1.1'
+        'databae >= 0.1.2'
 #        'sqlalchemy' # should be >= 0.5, but doesn't work properly
     ],
     zip_safe = False,
