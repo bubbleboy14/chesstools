@@ -1,43 +1,11 @@
 from fyg.util import Loggy
-import random, databae as db
 from _thread import start_new_thread
+from random import choice as ranchoice
+from .variation import Variation
+from .transposition import Table
 
 INFINITY = float('inf')
 PROFILER = None # cProfile or pyinstrument
-
-class Variation(object):
-    def __init__(self, board, move, score=-INFINITY, current=False):
-        if current:
-            self.board = board
-        else:
-            self.board = board.copy()
-            self.board.move(move)
-        self.move = move
-        self.score = score
-        self._sig = None
-
-    def __neg__(self):
-        return Variation(self.board, self.move, -self.score, True)
-
-    def __cmp__(self, other):
-        return cmp(self.score, other.score)
-
-    def __lt__(self, other):
-        return self.score < other.score
-
-    def __gt__(self, other):
-        return self.score > other.score
-
-    def __repr__(self):
-        return "<Variation %s %s>"%(self.move, self.score)
-
-    def signature(self):
-        if not self._sig:
-            self._sig = self.board.fen_signature()
-        return self._sig
-
-    def move_info(self):
-        return self.move.from_to_promotion()
 
 class AI(Loggy):
     def __init__(self, depth, move, output=None, book=None, random=None):
@@ -46,7 +14,7 @@ class AI(Loggy):
         self._output_cb = output
         self._book = book
         self._random = random or 1
-        self._table = {}
+        self._table = Table()
 
     def __call__(self, board):
         def _think():
@@ -57,6 +25,7 @@ class AI(Loggy):
             for branch in branches:
                 self._step(branch, self._depth, -INFINITY, INFINITY)
                 self._report('%s:%s'%(branch.move, branch.score))
+                self._table.flush()
             branches.sort()
             self._move([branch.move_info() for branch in branches])
         def _dothink():
@@ -78,7 +47,7 @@ class AI(Loggy):
         start_new_thread(_dothink, ())
 
     def _move(self, moves):
-        self._move_cb(*random.choice(moves[:self._random]))
+        self._move_cb(*ranchoice(moves[:self._random]))
 
     def _report(self, data, loud=False):
         if self._output_cb:
@@ -91,20 +60,13 @@ class AI(Loggy):
 
     def _score(self, variation, score, depth=INFINITY):
         variation.score = score
-        trans = Transposition()
-        trans.sig = variation.signature()
-        trans.score = variation.score
-        trans.depth = depth
-        trans.put()
-#        self._table[variation.signature()] = (variation.score, depth)
+        self._table.score(variation, score, depth)
 
     def _step(self, variation, depth, alpha, beta):
         sig = variation.signature()
-        trans = Transposition.query(Transposition.sig == sig).get()
-        if trans and trans.depth >= depth:
-#        if sig in self._table and self._table[sig][1] >= depth:
+        trans = self._table.get(sig, depth)
+        if trans:
             variation.score = trans.score
-#            variation.score = self._table[sig][0]
             return
         if not depth:
             return self._score(variation, self.evaluate(variation.board), 0)
@@ -119,8 +81,3 @@ class AI(Loggy):
 
     def evaluate(self, board):
         raise Exception("evaluate is unimplemented in the base AI class, and must be overridden by a function that returns a number.")
-
-class Transposition(db.ModelBase):
-    sig = db.String()
-    score = db.Integer()
-    depth = db.Integer()
