@@ -1,11 +1,11 @@
 from fyg.util import Loggy
 from _thread import start_new_thread
 from random import choice as ranchoice
-from .variation import Variation
 from .transposition import Table
+from .variation import Variation
+from .thinker import Thinker
 
 INFINITY = float('inf')
-PROFILER = None # cProfile or pyinstrument
 
 class AI(Loggy):
     def __init__(self, depth, move, output=None, book=None, random=None):
@@ -15,40 +15,19 @@ class AI(Loggy):
         self._book = book
         self._random = random or 1
         self._table = Table()
+        self._thinker = Thinker(self._table, self._depth,
+            self._step, self._move, self._branches, self._report)
 
     def __call__(self, board):
-        def _think():
-            withdb = board.fullmove < 10
-            branches = self._branches(board)
-            blen = len(branches)
-            if not branches:
-                return self._report('i lose!', True)
-            self._report('scoring %s moves'%(blen,), True)
-            i = 0
-            for branch in branches:
-                i += 1
-                self._step(branch, self._depth, -INFINITY, INFINITY, withdb)
-                self._report('%s:%s (%s/%s)'%(branch.move, branch.score, i, blen), True)
-                self._table.flush()
-            branches.sort()
-            self._move([branch.move_info() for branch in branches])
-        def _dothink():
-            if PROFILER == "cProfile":
-                import cProfile
-                cProfile.runctx("_think()", None,
-                    locals(), "pro/move%s.pro"%(board.fullmove,))
-            elif PROFILER == "pyinstrument":
-                from pyinstrument import Profiler
-                with Profiler(interval=0.1) as profiler:
-                    _think()
-                profiler.print()
-            else:
-                _think()
         if self._book:
             moves = self._book.check(board.fen_signature())
             if moves:
                 return self._move(moves)
-        start_new_thread(_dothink, ())
+        self._thinker.setBoard(board)
+        start_new_thread(self._thinker, ())
+
+    def _branches(self, board):
+        return [Variation(board, move) for move in board.all_legal_moves()]
 
     def _move(self, moves):
         self._move_cb(*ranchoice(moves[:self._random]))
@@ -58,9 +37,6 @@ class AI(Loggy):
             self._output_cb(data)
         if loud:
             self.log(data)
-
-    def _branches(self, board):
-        return [Variation(board, move) for move in board.all_legal_moves()]
 
     def _score(self, variation, score, depth=INFINITY, withdb=False):
         variation.score = score
