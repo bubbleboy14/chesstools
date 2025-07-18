@@ -12,6 +12,7 @@ setup(
     long_description='Speaks proper FEN, SAN, and long algebraic notation. Supports standard chess and chess960 (Fischer-random). Handles move validation and checkmate/ stalemate/ repetition/ 50-move-rule checking. Features server-side timekeeping with optional latency compensation. The compact minimax AI framework utilizes alpha-beta pruning and transposition tables under the hood. This enables the developer to produce a modern custom bot by simply overriding AI.evaluate. Additionally, chesstools.book provides an intuitive interface for building opening book databases for use in conjunction with an ai.',
     packages=[
         'chesstools',
+        'chesstools.ai'
     ],
     entry_points = '''
         [console_scripts]
