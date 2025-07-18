@@ -12,7 +12,7 @@ class Thinker(object):
 
 	def setBoard(self, board):
 		self.board = board
-		self.withdb = board.fullmove < 10
+		self.withdb = board.fullmove < 13
 		self.branches = self.brancher(board)
 
 	def think(self):
