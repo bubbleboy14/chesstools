@@ -24,7 +24,10 @@ class Variation(object):
         return self.score > other.score
 
     def __repr__(self):
-        return "<Variation %s %s>"%(self.move, self.score)
+        return "<Variation %s>"%(self.sig(),)
+
+    def sig(self):
+        return "%s %s"%(self.move, self.score)
 
     def signature(self):
         if not self._sig:

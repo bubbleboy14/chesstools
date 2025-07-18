@@ -47,7 +47,7 @@ class AI(Loggy):
         dtup = self._table.get(sig, depth, depth and withdb)
         if dtup:
             variation.score = dtup[1]
-            return
+            return True
         if not depth:
             return self._score(variation, self.evaluate(variation.board), 0)
         branches = self._branches(variation.board)
