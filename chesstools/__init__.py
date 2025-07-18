@@ -13,7 +13,7 @@ except:
         psyco.full()
         print("initializing psyco - wow, you must have python <2.7! how?")
     except:
-        print("pyjion (py3.10+) or psyco (py<2.7) _may_ help your bot run faster")
+        print("pyjion (py3.10+) or psyco (py<2.7) _may_ help your bot run faster, but you should really just use pypy")
 
 COLORS = {'white':'black','black':'white'}
 
