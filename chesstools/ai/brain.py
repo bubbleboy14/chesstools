@@ -18,6 +18,7 @@ class AI(Loggy):
 
     def __call__(self, board):
         def _think():
+            withdb = board.fullmove < 10
             branches = self._branches(board)
             blen = len(branches)
             if not branches:
@@ -26,7 +27,7 @@ class AI(Loggy):
             i = 0
             for branch in branches:
                 i += 1
-                self._step(branch, self._depth, -INFINITY, INFINITY)
+                self._step(branch, self._depth, -INFINITY, INFINITY, withdb)
                 self._report('%s:%s (%s/%s)'%(branch.move, branch.score, i, blen), True)
                 self._table.flush()
             branches.sort()
@@ -61,13 +62,13 @@ class AI(Loggy):
     def _branches(self, board):
         return [Variation(board, move) for move in board.all_legal_moves()]
 
-    def _score(self, variation, score, depth=INFINITY):
+    def _score(self, variation, score, depth=INFINITY, withdb=False):
         variation.score = score
-        self._table.score(variation, score, depth)
+        self._table.score(variation, score, depth, withdb)
 
-    def _step(self, variation, depth, alpha, beta):
+    def _step(self, variation, depth, alpha, beta, withdb=False):
         sig = variation.signature()
-        dtup = self._table.get(sig, depth)
+        dtup = self._table.get(sig, depth, depth and withdb)
         if dtup:
             variation.score = dtup[1]
             return
@@ -75,12 +76,12 @@ class AI(Loggy):
             return self._score(variation, self.evaluate(variation.board), 0)
         branches = self._branches(variation.board)
         if not branches:
-            return self._score(variation, -INFINITY)
+            return self._score(variation, -INFINITY, withdb=withdb)
         for branch in branches:
-            self._step(branch, depth-1, -beta, -alpha)
+            self._step(branch, depth-1, -beta, -alpha, withdb)
             alpha = max(alpha, -branch.score)
             if alpha >= beta: break
-        self._score(variation, alpha, depth)
+        self._score(variation, alpha, depth, withdb)
 
     def evaluate(self, board):
         raise Exception("evaluate is unimplemented in the base AI class, and must be overridden by a function that returns a number.")
