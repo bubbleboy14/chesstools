@@ -4,31 +4,28 @@ INFINITY = float('inf')
 PROFILER = None # cProfile or pyinstrument
 
 class Thinker(Loggy):
-	def __init__(self, table, depth, stepper, mover, brancher, reporter):
+	def __init__(self, table, depth, stepper, mover, brancher, reporter, runoff=4, dbuntil=20):
 		self.table = table
 		self.depth = depth
 		self.mover = mover
+		self.runoff = runoff
+		self.dbuntil = dbuntil
 		self.stepper = stepper
 		self.brancher = brancher
 		self.reporter = reporter
 
 	def setBoard(self, board):
 		self.board = board
-		self.withdb = board.fullmove < 21
+		self.withdb = board.fullmove <= self.dbuntil
 		self.branches = self.brancher(board)
 
 	def runoff(self):
-		v1 = self.branches[0]
-		v2 = self.branches[1]
-		sig1 = v1.sig()
-		sig2 = v2.sig()
-		self.log("runoff", sig1, "vs", sig2)
-		self.branches = [v1, v2]
+		self.branches = self.branches[:self.runoff]
+		self.log("runoff initials:", " vs ".join([b.sig() for b in self.branches]))
 		self.depth += 1
 		self.evaluate()
 		self.depth -= 1
-		self.log("branch 1:", sig1, "->", v1.sig())
-		self.log("branch 2:", sig2, "->", v2.sig())
+		self.log("runoff rescores:", " vs ".join([b.sig() for b in self.branches]))
 
 	def evaluate(self):
 		i = 0
