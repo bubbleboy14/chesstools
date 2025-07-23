@@ -4,11 +4,11 @@ INFINITY = float('inf')
 PROFILER = None # cProfile or pyinstrument
 
 class Thinker(Loggy):
-	def __init__(self, table, depth, stepper, mover, brancher, reporter, runoff=4, dbuntil=20):
+	def __init__(self, table, depth, stepper, mover, brancher, reporter, rofflim=4, dbuntil=20):
 		self.table = table
 		self.depth = depth
 		self.mover = mover
-		self.runoff = runoff
+		self.rofflim = rofflim
 		self.dbuntil = dbuntil
 		self.stepper = stepper
 		self.brancher = brancher
@@ -20,7 +20,7 @@ class Thinker(Loggy):
 		self.branches = self.brancher(board)
 
 	def runoff(self):
-		self.branches = self.branches[:self.runoff]
+		self.branches = self.branches[:self.rofflim]
 		self.log("runoff initials:", " vs ".join([b.sig() for b in self.branches]))
 		self.depth += 1
 		self.evaluate()

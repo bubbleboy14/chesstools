@@ -8,7 +8,7 @@ from .thinker import Thinker
 INFINITY = float('inf')
 
 class AI(Loggy):
-    def __init__(self, depth, move, output=None, book=None, random=None, runoff=4, dbuntil=20):
+    def __init__(self, depth, move, output=None, book=None, random=None, rofflim=4, dbuntil=20):
         self._depth = depth
         self._move_cb = move
         self._output_cb = output
@@ -16,7 +16,7 @@ class AI(Loggy):
         self._random = random or 1
         self._table = Table()
         self._thinker = Thinker(self._table, self._depth,
-            self._step, self._move, self._branches, self._report, runoff, dbuntil)
+            self._step, self._move, self._branches, self._report, rofflim, dbuntil)
 
     def __call__(self, board):
         if self._book:
