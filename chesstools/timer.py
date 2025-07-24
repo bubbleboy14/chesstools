@@ -41,6 +41,9 @@ class Timer(object):
     def get_opponent(self, color):
         return self.players[color == 'white' and 1 or -1]
 
+    def get_player(self, color):
+        return self.players[color == 'white' and -1 or 1]
+
     def get_seconds(self):
         self.update()
         return self.players[-1], self.players[1]
