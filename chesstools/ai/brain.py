@@ -8,22 +8,22 @@ from .thinker import Thinker
 INFINITY = float('inf')
 
 class AI(Loggy):
-    def __init__(self, depth, move, output=None, book=None, random=None, rofflim=4, dbuntil=20):
+    def __init__(self, timer, move, output=None, book=None, depth=1, random=1, rofflim=4, dbuntil=20, rushbelow=180):
         self._depth = depth
         self._move_cb = move
         self._output_cb = output
         self._book = book
-        self._random = random or 1
+        self._random = random
         self._table = Table()
-        self._thinker = Thinker(self._table, self._depth,
-            self._step, self._move, self._branches, self._report, rofflim, dbuntil)
+        self._thinker = Thinker(self._table, timer, self._depth, self._step,
+            self._move, self._branches, self._report, rofflim, dbuntil, rushbelow)
 
-    def __call__(self, board):
+    def __call__(self, board, color):
         if self._book:
             moves = self._book.check(board.fen_signature())
             if moves:
                 return self._move(moves)
-        self._thinker.setBoard(board)
+        self._thinker.setBoard(board, color)
         start_new_thread(self._thinker, ())
 
     def _branches(self, board):

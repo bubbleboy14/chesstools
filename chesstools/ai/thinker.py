@@ -4,8 +4,9 @@ INFINITY = float('inf')
 PROFILER = None # cProfile or pyinstrument
 
 class Thinker(Loggy):
-	def __init__(self, table, depth, stepper, mover, brancher, reporter, rofflim=4, dbuntil=20):
+	def __init__(self, table, timer, depth, stepper, mover, brancher, reporter, rofflim=4, dbuntil=20, rushbelow=180):
 		self.table = table
+		self.timer = timer
 		self.depth = depth
 		self.mover = mover
 		self.rofflim = rofflim
@@ -13,10 +14,15 @@ class Thinker(Loggy):
 		self.stepper = stepper
 		self.brancher = brancher
 		self.reporter = reporter
+		self.rushbelow = rushbelow
 
-	def setBoard(self, board):
+	def setBoard(self, board, color):
 		self.board = board
-		self.withdb = board.fullmove <= self.dbuntil
+		movenum = board.fullmove
+		timeleft = self.timer.get_player(color)
+		self.withdb = timeleft > self.rushbelow and movenum <= self.dbuntil
+		self.log("setBoard with color", color, "move",
+			movenum, "time", timeleft, "and withdb", self.withdb)
 		self.branches = self.brancher(board)
 
 	def runoff(self):
