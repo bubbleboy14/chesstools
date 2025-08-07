@@ -8,13 +8,13 @@ from .thinker import Thinker
 INFINITY = float('inf')
 
 class AI(Loggy):
-    def __init__(self, timer, move, output=None, book=None, depth=1, random=1, rofflim=3, dbuntil=20, rushbelow=240):
+    def __init__(self, timer, move, output=None, book=None, depth=1, random=1, rofflim=3, dbuntil=20, rushbelow=240, preppy=True):
         self._depth = depth
         self._move_cb = move
         self._output_cb = output
         self._book = book
         self._random = random
-        self._table = Table()
+        self._table = Table(preppy)
         self._thinker = Thinker(self._table, timer, self._depth, self._step,
             self._move, self._branches, self._report, rofflim, dbuntil, rushbelow)
 
