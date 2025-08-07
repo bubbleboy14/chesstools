@@ -28,13 +28,13 @@ class Table(Loggy):
 
     def prep(self, allsigs):
         sigs = list(filter(lambda s : s not in self._deepest, allsigs))
-        transes = Transposition.query(Transposition.sig.in_(sigs)).all()
+        transes = Transposition.query(Transposition.sig.in_(sigs)).select("sig", "depth", "score")
         slen = len(sigs)
         self.prepped += slen
         self.hits += len(transes)
         self.skips += len(allsigs) - slen
         for trans in transes:
-            self.add(trans.sig, (trans.depth, trans.score))
+            self.add(trans[0], (trans[1], trans[2]))
 
     def get(self, sig, depth, withdb=False):
         if sig in self._deepest:
