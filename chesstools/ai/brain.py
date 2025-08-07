@@ -8,7 +8,7 @@ from .thinker import Thinker
 INFINITY = float('inf')
 
 class AI(Loggy):
-    def __init__(self, timer, move, output=None, book=None, depth=1, random=1, rofflim=4, dbuntil=20, rushbelow=180):
+    def __init__(self, timer, move, output=None, book=None, depth=1, random=1, rofflim=4, dbuntil=20, rushbelow=240):
         self._depth = depth
         self._move_cb = move
         self._output_cb = output

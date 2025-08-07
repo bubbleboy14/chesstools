@@ -4,7 +4,7 @@ INFINITY = float('inf')
 PROFILER = None # cProfile or pyinstrument
 
 class Thinker(Loggy):
-	def __init__(self, table, timer, depth, stepper, mover, brancher, reporter, rofflim=4, dbuntil=20, rushbelow=180):
+	def __init__(self, table, timer, depth, stepper, mover, brancher, reporter, rofflim=4, dbuntil=20, rushbelow=240):
 		self.table = table
 		self.timer = timer
 		self.depth = depth
