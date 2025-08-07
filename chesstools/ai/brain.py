@@ -26,8 +26,10 @@ class AI(Loggy):
         self._thinker.setBoard(board, color)
         start_new_thread(self._thinker, ())
 
-    def _branches(self, board):
-        return [Variation(board, move) for move in board.all_legal_moves()]
+    def _branches(self, board, withdb=False):
+        branches = [Variation(board, move) for move in board.all_legal_moves()]
+        withdb and self._table.prep([b.signature() for b in branches])
+        return branches
 
     def _move(self, moves):
         self._move_cb(*ranchoice(moves[:self._random]))
@@ -44,13 +46,13 @@ class AI(Loggy):
 
     def _step(self, variation, depth, alpha, beta, withdb=False):
         sig = variation.signature()
-        dtup = self._table.get(sig, depth, depth and withdb)
+        dtup = self._table.get(sig, depth)#, depth and withdb)
         if dtup:
             variation.score = dtup[1]
             return True
         if not depth:
             return self._score(variation, self.evaluate(variation.board), 0)
-        branches = self._branches(variation.board)
+        branches = self._branches(variation.board, withdb)
         if not branches:
             return self._score(variation, -INFINITY, withdb=withdb)
         for branch in branches:
