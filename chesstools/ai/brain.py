@@ -46,7 +46,7 @@ class AI(Loggy):
 
     def _step(self, variation, depth, alpha, beta, withdb=False):
         sig = variation.signature()
-        dtup = self._table.get(sig, depth)#, depth and withdb)
+        dtup = self._table.get(sig, depth, depth and withdb)
         if dtup:
             variation.score = dtup[1]
             return True

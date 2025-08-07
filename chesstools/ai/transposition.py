@@ -11,7 +11,8 @@ class Transposition(db.ModelBase):
     depth = db.Integer()
 
 class Table(Loggy):
-    def __init__(self):
+    def __init__(self, preppy=True):
+        self.preppy = preppy
         self._all = {}
         self._deepest = {}
         self.prepped = 0
@@ -26,11 +27,16 @@ class Table(Loggy):
                 self._all[sig] = []
             self._all[sig].append(dstup)
 
-    def prep(self, allsigs):
-        sigs = list(filter(lambda s : s not in self._deepest, allsigs))
-        transes = Transposition.query(cols=[
+    def query(self, filt):
+        return Transposition.query(cols=[
             "sig", "depth", "score"
-        ]).filter(Transposition.sig.in_(sigs)).all()
+        ]).filter(filt)
+
+    def prep(self, allsigs):
+        if not self.preppy:
+            return
+        sigs = list(filter(lambda s : s not in self._deepest, allsigs))
+        transes = self.query(Transposition.sig.in_(sigs)).all()
         slen = len(sigs)
         self.prepped += slen
         self.hits += len(transes)
@@ -43,10 +49,10 @@ class Table(Loggy):
             dstup = self._deepest[sig]
             if dstup[0] >= depth:
                 return dstup
-        if withdb:
-            trans = Transposition.query(Transposition.sig == sig).order(-Transposition.depth).get()
-            if trans and trans.depth >= depth:
-                return (trans.depth, trans.score)
+        if withdb and not self.preppy:
+            trans = self.query(Transposition.sig == sig).order(-Transposition.depth).get()
+            if trans and trans[1] >= depth:
+                return (trans[1], trans[2])
 
     def score(self, variation, score, depth, withdb=False):
         self.add(variation.signature(), (depth, score), withdb)
@@ -65,6 +71,7 @@ class Table(Loggy):
         transes = sum(list(map(self.transets, self._all.keys())), [])
         db.put_multi(transes)
         self._all = {}
-        self.log("saved:", len(transes), "cache:", len(self._deepest.keys()),
-            "prepped:", self.prepped, "hits:", self.hits, "skips:", self.skips)
-        self.prepped = self.skips = self.hits = 0
+        self.log("saved:", len(transes), "cache:", len(self._deepest.keys()))
+        if self.preppy:
+            self.log("prepped:", self.prepped, "skips:", self.skips, "hits:", self.hits)
+            self.prepped = self.skips = self.hits = 0
