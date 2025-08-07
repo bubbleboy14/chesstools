@@ -14,6 +14,9 @@ class Table(Loggy):
     def __init__(self):
         self._all = {}
         self._deepest = {}
+        self.prepped = 0
+        self.skips = 0
+        self.hits = 0
 
     def add(self, sig, dtup, withdb=False):
         if sig not in self._deepest or self._deepest[sig][0] < dtup[0]:
@@ -22,6 +25,16 @@ class Table(Loggy):
             if sig not in self._all:
                 self._all[sig] = []
             self._all[sig].append(dtup)
+
+    def prep(self, allsigs):
+        sigs = list(filter(lambda s : s not in self._deepest, allsigs))
+        transes = Transposition.query(Transposition.sig.in_(sigs)).all()
+        slen = len(sigs)
+        self.prepped += slen
+        self.hits += len(transes)
+        self.skips += len(allsigs) - slen
+        for trans in transes:
+            self.add(trans.sig, (trans.depth, trans.score))
 
     def get(self, sig, depth, withdb=False):
         if sig in self._deepest:
@@ -50,4 +63,6 @@ class Table(Loggy):
         transes = sum(list(map(self.transets, self._all.keys())), [])
         db.put_multi(transes)
         self._all = {}
-        self.log("saved:", len(transes), "cache:", len(self._deepest.keys()))
+        self.log("saved:", len(transes), "cache:", len(self._deepest.keys()),
+            "prepped:", self.prepped, "hits:", self.hits, "skips:", self.skips)
+        self.prepped = self.skips = self.hits = 0
