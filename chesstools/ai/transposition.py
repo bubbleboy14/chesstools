@@ -18,13 +18,13 @@ class Table(Loggy):
         self.skips = 0
         self.hits = 0
 
-    def add(self, sig, dtup, withdb=False):
-        if sig not in self._deepest or self._deepest[sig][0] < dtup[0]:
-            self._deepest[sig] = dtup
+    def add(self, sig, dstup, withdb=False):
+        if sig not in self._deepest or self._deepest[sig][0] < dstup[0]:
+            self._deepest[sig] = dstup
         if withdb:
             if sig not in self._all:
                 self._all[sig] = []
-            self._all[sig].append(dtup)
+            self._all[sig].append(dstup)
 
     def prep(self, allsigs):
         sigs = list(filter(lambda s : s not in self._deepest, allsigs))
@@ -38,9 +38,9 @@ class Table(Loggy):
 
     def get(self, sig, depth, withdb=False):
         if sig in self._deepest:
-            dtup = self._deepest[sig]
-            if dtup[0] >= depth:
-                return dtup
+            dstup = self._deepest[sig]
+            if dstup[0] >= depth:
+                return dstup
         if withdb:
             trans = Transposition.query(Transposition.sig == sig).order(-Transposition.depth).get()
             if trans and trans.depth >= depth:
