@@ -23,7 +23,7 @@ class Thinker(Loggy):
 		self.withdb = timeleft > self.rushbelow and movenum <= self.dbuntil
 		self.log("setBoard with color", color, "move",
 			movenum, "time", timeleft, "and withdb", self.withdb)
-		self.branches = self.brancher(board)
+		self.branches = self.brancher(board, self.withdb)
 
 	def runoff(self):
 		self.branches = self.branches[:self.rofflim]
