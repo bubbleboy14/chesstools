@@ -28,7 +28,9 @@ class Table(Loggy):
 
     def prep(self, allsigs):
         sigs = list(filter(lambda s : s not in self._deepest, allsigs))
-        transes = Transposition.query(Transposition.sig.in_(sigs)).select("sig", "depth", "score")
+        transes = Transposition.query(cols=[
+            "sig", "depth", "score"
+        ]).filter(Transposition.sig.in_(sigs)).all()
         slen = len(sigs)
         self.prepped += slen
         self.hits += len(transes)
