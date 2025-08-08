@@ -1,3 +1,4 @@
+from datetime import datetime
 from fyg import config as confyg
 from fyg.util import Loggy
 import databae as db
@@ -67,11 +68,21 @@ class Table(Loggy):
     def transets(self, sig):
         return list(map(lambda tup : self.trans(sig, tup), self._all[sig]))
 
+    def start(self):
+        self.started = datetime.now()
+        self.size = len(self._deepest.keys())
+
+    def report(self, saved):
+        dt = (datetime.now() - self.started).total_seconds()
+        newsize = len(self._deepest.keys())
+        self.log("saved:", saved, "cache:", newsize, "time:", dt)
+        self.log("srate:", saved / dt, "crate:", (newsize - self.size) / dt)
+        if self.preppy:
+            self.log("prepped:", self.prepped, "skips:", self.skips, "hits:", self.hits)
+            self.prepped = self.skips = self.hits = 0
+
     def flush(self):
         transes = sum(list(map(self.transets, self._all.keys())), [])
         db.put_multi(transes)
         self._all = {}
-        self.log("saved:", len(transes), "cache:", len(self._deepest.keys()))
-        if self.preppy:
-            self.log("prepped:", self.prepped, "skips:", self.skips, "hits:", self.hits)
-            self.prepped = self.skips = self.hits = 0
+        self.report(len(transes))

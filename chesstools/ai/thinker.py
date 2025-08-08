@@ -40,6 +40,7 @@ class Thinker(Loggy):
 		self.reporter('scoring %s moves'%(blen,), True)
 		for branch in self.branches:
 			i += 1
+			self.table.start()
 			allhits = self.stepper(branch, self.depth, -INFINITY, INFINITY, self.withdb)
 			self.reporter('%s:%s (%s/%s)'%(branch.move, branch.score, i, blen), True)
 			self.table.flush()
