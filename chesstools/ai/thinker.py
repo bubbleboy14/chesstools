@@ -27,11 +27,11 @@ class Thinker(Loggy):
 
 	def runoff(self):
 		self.branches = self.branches[:self.rofflim]
-		self.log("runoff initials:", " vs ".join([b.sig() for b in self.branches]))
+		self.log("runoff pre:", " vs ".join([b.sig() for b in self.branches]))
 		self.depth += 1
 		self.evaluate()
 		self.depth -= 1
-		self.log("runoff rescores:", " vs ".join([b.sig() for b in self.branches]))
+		self.log("runoff post:", " vs ".join([b.sig() for b in self.branches]))
 
 	def evaluate(self):
 		i = 0

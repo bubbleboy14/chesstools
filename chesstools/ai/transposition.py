@@ -76,7 +76,7 @@ class Table(Loggy):
         dt = (datetime.now() - self.started).total_seconds()
         newsize = len(self._deepest.keys())
         self.log("saved:", saved, "cache:", newsize, "time:", dt)
-        self.log("srate:", saved / dt, "crate:", (newsize - self.size) / dt)
+        self.log("srate:", round(saved / dt, 3), "crate:", round((newsize - self.size) / dt, 3))
         if self.preppy:
             self.log("prepped:", self.prepped, "skips:", self.skips, "hits:", self.hits)
             self.prepped = self.skips = self.hits = 0
