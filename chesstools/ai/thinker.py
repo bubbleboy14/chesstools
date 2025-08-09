@@ -21,9 +21,9 @@ class Thinker(Loggy):
 		movenum = board.fullmove
 		timeleft = self.timer.get_player(color)
 		self.withdb = timeleft > self.rushbelow and movenum <= self.dbuntil
-		self.log("setBoard with color", color, "move",
-			movenum, "time", timeleft, "and withdb", self.withdb)
-		self.branches = self.brancher(board, self.withdb)
+		self.log("setBoard color", color, "move", movenum,
+			"time", round(timeleft), "withdb", self.withdb)
+		self.branches = self.brancher(board, self.withdb, True)
 
 	def runoff(self):
 		self.branches = self.branches[:self.rofflim]

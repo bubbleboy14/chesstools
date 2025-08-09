@@ -26,9 +26,9 @@ class AI(Loggy):
         self._thinker.setBoard(board, color)
         start_new_thread(self._thinker, ())
 
-    def _branches(self, board, withdb=False):
+    def _branches(self, board, withdb=False, timed=False):
         branches = [Variation(board, move) for move in board.all_legal_moves()]
-        withdb and self._table.prep([b.signature() for b in branches])
+        withdb and self._table.prep([b.signature() for b in branches], timed)
         return branches
 
     def _move(self, moves):
