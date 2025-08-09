@@ -5,6 +5,7 @@ import databae as db
 
 confyg.log.allow.append("db")
 db.config.update("prags", "fast")
+db.config.update("optimize", True)
 db.config.pool.update("null", False)
 
 class Transposition(db.ModelBase):
