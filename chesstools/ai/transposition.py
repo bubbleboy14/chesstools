@@ -105,6 +105,7 @@ class Table(Loggy):
 
     def flush(self):
         transes = sum(list(map(self.transets, self._all.keys())), [])
-        self.timed("write", lambda : db.put_multi(transes))
+        tlen = len(transes)
+        tlen and self.timed("write", lambda : db.put_multi(transes))
         self._all = {}
-        self.report(len(transes))
+        self.report(tlen)
