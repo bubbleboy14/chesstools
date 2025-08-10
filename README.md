@@ -1,4 +1,4 @@
-chesstools 0.2.4.9
+chesstools 0.2.4.10
 
 A library of tools for writing chess AI's, as well as servers, clients, and any other software that requires a chess engine. Speaks proper FEN, SAN, and long algebraic notation. Supports standard chess and chess960 (Fischer-random). Handles move validation and checkmate/ stalemate/ repetition/ 50-move-rule checking. Features server-side timekeeping with optional latency compensation.
 

@@ -1,4 +1,4 @@
-__version__ = "0.2.4.9"
+__version__ = "0.2.4.10"
 
 try:
     import pyjion
