@@ -237,7 +237,7 @@ class King(Piece):
                         m.append([a,b])
         if self.board.safe_square(self.pos):
             for rook in list(self.castle.values()):
-                if rook:
+                if rook and rook == self.board.get_square(rook.pos):
                     target_square = [row, rook.castle_king_column]
                     # target is empty
                     safemove = self.board.is_empty(target_square)

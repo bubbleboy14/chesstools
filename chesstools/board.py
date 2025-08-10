@@ -185,15 +185,15 @@ class Board(object):
         self.set_square(b, target, position)
         self.set_square(a, None, position)
 
-    def set_square(self, xxx_todo_changeme, piece, position=None):
-        (r,c) = xxx_todo_changeme
+    def set_square(self, coords, piece, position=None):
+        (r,c) = coords
         position = position or self.position
         position[r][c] = piece
         if position == self.position:
             self.changes.append(((r,c), piece))
 
-    def get_square(self, xxx_todo_changeme1, position=None):
-        (r,c) = xxx_todo_changeme1
+    def get_square(self, coords, position=None):
+        (r,c) = coords
         position = position or self.position
         return position[r][c]
 
