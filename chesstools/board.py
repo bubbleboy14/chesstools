@@ -215,7 +215,7 @@ class Board(object):
         color = color or self.turn
         position = position or self.position
         for piece in self.pieces(COLORS[color], pos=position):
-            if piece.can_take(dest, position):
+            if piece.can_target(dest, position):
                 return False
         return True
 
