@@ -9,7 +9,7 @@ db.config.update("optimize", True)
 db.config.pool.update("null", False)
 
 class Transposition(db.ModelBase):
-    sig = db.String()
+    sig = db.String(indexed=True)
     score = db.Integer()
     depth = db.Integer()
 
