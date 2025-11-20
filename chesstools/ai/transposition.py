@@ -1,6 +1,7 @@
 from datetime import datetime
 from fyg import config as confyg
 from fyg.util import Loggy
+from databae.poly import ModelBase
 import databae as db
 
 confyg.log.allow.append("db")
@@ -8,7 +9,9 @@ db.config.update("prags", "fast")
 db.config.update("optimize", True)
 db.config.pool.update("null", False)
 
-class Transposition(db.ModelBase):
+# TODO : ModelBase->FlatBase ; fixed-length sig
+
+class Transposition(ModelBase):
     sig = db.String(indexed=True)
     score = db.Integer()
     depth = db.Integer()

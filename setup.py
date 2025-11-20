@@ -19,7 +19,7 @@ setup(
         buildchessbook = chesstools.book:_build_command_line
     ''',
     install_requires = [
-        'databae >= 0.1.4.5'
+        'databae >= 0.1.4.18'
     ],
     zip_safe = False,
     classifiers = [
