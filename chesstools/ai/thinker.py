@@ -20,7 +20,13 @@ class Thinker(Loggy):
 		self.board = board
 		movenum = board.fullmove
 		timeleft = self.timer.get_player(color)
-		self.withdb = timeleft > self.rushbelow and movenum <= self.dbuntil
+
+		self.withdb = True
+		if timeleft < self.rushbelow:
+			if movenum > self.dbuntil or timeleft < self.rushbelow / 2:
+				self.withdb = False
+#		self.withdb = timeleft > self.rushbelow and movenum <= self.dbuntil
+
 		self.log("setBoard color", color, "move", movenum,
 			"time", round(timeleft), "withdb", self.withdb)
 		self.branches = self.brancher(board, self.withdb, True)
